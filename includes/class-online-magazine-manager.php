@@ -86,6 +86,7 @@ class Online_Magazine_Manager {
      */
     private function load_dependencies() {
         require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/class-online-magazine-manager-admin.php';
+        require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/class-online-magazine-manager-public.php';
 
         require_once plugin_dir_path( __FILE__ ) . 'class-online-magazine-loader.php';
         $this->loader = new Online_Magazine_Loader();

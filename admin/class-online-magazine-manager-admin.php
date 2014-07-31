@@ -4,8 +4,6 @@ class Online_Magazine_Manager_Admin {
 
     private $version;
 
-    private $options;
-
     function __construct($version)
     {
         $this->version = $version;
