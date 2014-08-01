@@ -113,9 +113,10 @@ class Online_Magazine_Manager_Admin {
         $article_issue_category_args = array(
             'hierarchical' => true,
             'labels' => $article_issue_category_labels,
-            'show_ui' => false,
+            'show_ui' => true,
+            'show_admin_column' => true,
             'query_var' => true,
-            'rewrite' => array( 'slug' => 'article-rubric' ),
+            'rewrite' => array( 'slug' => 'onlimag-rubric' ),
             'show_in_nav_menus' => true,
         );
 

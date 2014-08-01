@@ -91,6 +91,10 @@ class Online_Magazine_Manager {
         require_once plugin_dir_path( __FILE__ ) . 'class-online-magazine-loader.php';
         $this->loader = new Online_Magazine_Loader();
 
+        // like wpdb we make an instance of Online_Magazine_Manager_Public to make interface available to the users
+        global $ommp;
+        $ommp = new Online_Magazine_Manager_Public($this->version);
+
     }
 
     /**
@@ -145,6 +149,9 @@ class Online_Magazine_Manager {
 
 //        $public = new Single_Post_Meta_Manager_Public( $this->get_version() );
 //        $this->loader->add_action( 'the_content', $public, 'display_post_meta_data' );
+
+        $public = new Online_Magazine_Manager_Public( $this->version );
+        $this->loader->add_action( 'query_vars', $public, 'register_query_vars' );
 
     }
 
