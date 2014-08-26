@@ -16,6 +16,11 @@ class Online_Magazine_Manager_Admin {
         add_submenu_page( 'online-magazine', __( 'Rubrics', 'online-magazine' ), __( 'Rubrics', 'online-magazine' ), 'edit_posts', 'edit-tags.php?taxonomy=onlimag-rubric&post_type=onlimag-article', '' );
     }
 
+    function init_rewrite_rules() {
+        //temporary
+        add_rewrite_rule('rubrics/?$','index.php?post_type=onlimag-article','top');
+        add_rewrite_rule('rubrics/page/?([0-9]{1,})/?$','index.php?post_type=onlimag-article&paged=$matches[1]','top');
+    }
 
     function render_magazine_overview_page() {
         require_once plugin_dir_path( __FILE__ ) . 'partials/online-magazine-overview.php';
@@ -47,7 +52,7 @@ class Online_Magazine_Manager_Admin {
             'show_ui'            => true,
             'show_in_menu'       => false,
             'query_var'          => true,
-            'rewrite'            => array( 'slug' => 'issue' ),
+            'rewrite'            => array( 'slug' => 'issues' ),
             'capability_type'    => 'post',
             'has_archive'        => true,
             'hierarchical'       => false,
@@ -85,7 +90,7 @@ class Online_Magazine_Manager_Admin {
             'show_ui'            => true,
             'show_in_menu'       => false,
             'query_var'          => true,
-            'rewrite'            => array( 'slug' => 'article' ),
+            'rewrite'            => array( 'slug' => 'articles' ),
             'capability_type'    => 'post',
             'has_archive'        => true,
             'hierarchical'       => false,
@@ -116,7 +121,7 @@ class Online_Magazine_Manager_Admin {
             'show_ui' => true,
             'show_admin_column' => true,
             'query_var' => true,
-            'rewrite' => array( 'slug' => 'onlimag-rubric' ),
+            'rewrite' => array( 'slug' => 'rubrics' ),
             'show_in_nav_menus' => true,
         );
 
