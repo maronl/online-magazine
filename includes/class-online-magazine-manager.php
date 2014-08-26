@@ -112,6 +112,7 @@ class Online_Magazine_Manager {
         $this->loader->add_action( 'admin_menu', $admin, 'register_admin_menu' );
         $this->loader->add_action( 'init', $admin, 'register_issue_post_type' );
         $this->loader->add_action( 'init', $admin, 'register_issue_article_post_type' );
+        $this->loader->add_action( 'init', $admin, 'init_rewrite_rules' );
         $this->loader->add_action( 'parent_file', $admin, 'taxonomy_submenu_correction' );
 
         /*
@@ -152,6 +153,8 @@ class Online_Magazine_Manager {
 
         $public = new Online_Magazine_Manager_Public( $this->version );
         $this->loader->add_action( 'query_vars', $public, 'register_query_vars' );
+        $this->loader->add_action( 'pre_get_posts', $public, 'fix_archive_query_with_rubrics_filter' );
+
 
     }
 
