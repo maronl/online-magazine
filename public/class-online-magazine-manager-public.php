@@ -20,12 +20,20 @@ class Online_Magazine_Manager_Public {
     }
 
     public function fix_archive_query_with_rubrics_filter( $query ) {
+        if( ! $query->is_main_query() ) {
+            $this->remove_filters_for_articles_query();
+            return $query;
+        }
+
         if (
-        ( is_tax() && is_main_query() && isset( $query->query_vars['onlimag-rubric'] ) )
+        ( is_tax() && $query->is_main_query() && isset( $query->query_vars['onlimag-rubric'] ) )
         ||
-        ( is_archive() && is_main_query() && $query->query_vars['post_type'] == 'onlimag-article' )
+        ( is_archive() && $query->is_main_query() && $query->query_vars['post_type'] == 'onlimag-article' )
         ) {
             $this->add_filters_for_articles_query();
+        }
+        if  ( is_single() && $query->is_main_query() && $query->query_vars['post_type'] == 'onlimag-article' ) {
+            $this->add_filters_for_single_article_query();
         }
         return $query;
     }
@@ -91,7 +99,56 @@ class Online_Magazine_Manager_Public {
         }
     }
 
-    public function get_the_issues( $args = array() ) {
+    public function get_the_issue( $issue_id = null ) {
+
+        $args['post_status'] = 'publish';
+        $args['post_type'] = 'onlimag-issue';
+        $args['p'] = $issue_id;
+
+        $issue = new WP_Query($args);
+
+        return $issue->post;
+
+    }
+
+    public function get_the_article_issue( $article_id = null ) {
+
+        $issue_id = $this->get_the_article_issue_ID($article_id);
+
+        $args['post_status'] = 'publish';
+        $args['post_type'] = 'onlimag-issue';
+        $args['p'] = $issue_id;
+
+        $issue = new WP_Query($args);
+
+        return $issue->post;
+
+    }
+
+    public function get_the_article_issue_ID( $article_id = null ) {
+
+        if( is_null( $article_id ) ) {
+            return null;
+        }
+
+        global $table_prefix, $wpdb;
+
+        $issue_id = $wpdb->get_results(
+            $wpdb->prepare(
+                "
+                SELECT magazine_id
+                FROM " . $table_prefix . "onlimag_magazine
+                WHERE article_id = %d
+                ",
+                $article_id
+            )
+        );
+
+        return $issue_id[0]->magazine_id;
+
+    }
+
+    public function get_the_published_issues( $args = array() ) {
 
         if ( ! isset( $args['orderby'] ) ) {
             $args['orderby'] = 'date';
@@ -114,6 +171,21 @@ class Online_Magazine_Manager_Public {
 
     }
 
+    public function get_the_next_issue() {
+
+        $args = array();
+        $args['orderby'] = 'date';
+        $args['order'] = 'ASC';
+        $args['posts_per_page'] = 1;
+        $args['post_status'] = 'future';
+        $args['post_type'] = 'onlimag-issue';
+
+        $issues = new WP_Query($args);
+
+        return $issues->post;
+
+    }
+
     public function the_issues_widget($args = array()) {
 
         $title = __('Issues', 'onlimag');
@@ -132,7 +204,7 @@ class Online_Magazine_Manager_Public {
         $item_format .= '%s';
         $read_all_format .= '%s';
 
-        $issues = $this->get_the_issues(array('posts_per_page' => $item_number));
+        $issues = $this->get_the_published_issues(array('posts_per_page' => $item_number));
         $issues = $issues->posts;
         if (!empty($issues)) {
             printf($title_format, $title, PHP_EOL);
@@ -216,7 +288,7 @@ class Online_Magazine_Manager_Public {
 
     public function posts_fields_filter_for_articles( $fields ) {
         global $wpdb;
-        $fields .= ", magazine_details.post_title as issue_title, magazine_details.post_name as issue_slug, GROUP_CONCAT($wpdb->terms.name SEPARATOR ', ') as rubrics";
+        $fields .= ", magazine_details.ID as issue_ID, magazine_details.post_title as issue_title, magazine_details.post_name as issue_slug, GROUP_CONCAT($wpdb->terms.name SEPARATOR ', ') as rubrics";
         return ($fields);
     }
 
@@ -242,6 +314,13 @@ class Online_Magazine_Manager_Public {
             $this->selectedMagazine = $magazine_id;
             add_filter('posts_where', array( $this, 'posts_where_filter_for_magazine' ) );
         }
+    }
+
+    public function add_filters_for_single_article_query() {
+        add_filter('posts_join', array( $this, 'posts_join_filter_for_articles' ) );
+        add_filter('posts_fields', array( $this, 'posts_fields_filter_for_articles' ) );
+        add_filter('posts_groupby', array( $this, 'posts_groupby_filter_for_articles' ) );
+        add_filter('posts_join', array( $this, 'posts_join_filter_for_magazine' ) );
     }
 
     public function remove_filters_for_articles_query( $magazine_id = null ) {
