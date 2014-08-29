@@ -156,16 +156,39 @@ class Online_Magazine_Manager_Admin {
             array( $this, 'render_meta_box_issue_articles' ),
             'onlimag-issue'
         );
+        wp_enqueue_script( 'jquery-ui-sortable' );
     }
 
     function render_meta_box_issue_articles( $post ) {
+        global $ommp;
 
         wp_nonce_field( 'issue_articles_meta_box', 'issue_articles_meta_box_nonce' );
 
-        echo '<label for="myplugin_new_field">';
-        _e( 'Description for this field', 'myplugin_textdomain' );
-        echo '</label> ';
-        echo '<input type="text" id="myplugin_new_field" name="myplugin_new_field" value="' . esc_attr( $value ) . '" size="25" />';
+        $articles = $ommp->get_the_articles( array( 'magazine' => $post->ID) );
+
+        echo '<ul id="sortable">';
+
+        while ( $articles->have_posts() ) :
+
+            $articles->the_post();
+
+            global $post;
+
+            echo '<li class="ui-state-default">'.$post->post_title.'</li>';
+
+        endwhile;
+
+        echo '</ul>';
+
+        ?>
+        <script>
+            jQuery(function() {
+                jQuery( "#sortable" ).sortable();
+                jQuery( "#sortable" ).disableSelection();
+            });
+        </script>
+<?php
+
     }
 
 }
