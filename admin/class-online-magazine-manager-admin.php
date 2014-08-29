@@ -149,4 +149,23 @@ class Online_Magazine_Manager_Admin {
 
     }
 
+    function add_meta_box_issue_articles() {
+        add_meta_box(
+            'issue_articles_id',
+            __( "Issue's articles", 'onlimag' ),
+            array( $this, 'render_meta_box_issue_articles' ),
+            'onlimag-issue'
+        );
+    }
+
+    function render_meta_box_issue_articles( $post ) {
+
+        wp_nonce_field( 'issue_articles_meta_box', 'issue_articles_meta_box_nonce' );
+
+        echo '<label for="myplugin_new_field">';
+        _e( 'Description for this field', 'myplugin_textdomain' );
+        echo '</label> ';
+        echo '<input type="text" id="myplugin_new_field" name="myplugin_new_field" value="' . esc_attr( $value ) . '" size="25" />';
+    }
+
 }
