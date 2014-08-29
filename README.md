@@ -3,7 +3,7 @@ online-magazine
 
 The Online Magazine is a WordPress plugin that enable WordPress within the elements necessary to manage efficiently an online magazine. online magazine is composed by issues delivered periodically. Each issue contains article grouped by category/rubric
 
-theme function
+theme functions
 ===============
 
 the plugin initiate a global variable $ommp that can be used to use the utilities developed and exposed by the plugin into the theme you are developing
@@ -63,6 +63,14 @@ args = array(
     'post_per_page' => 5
 )
 ```
+
+**get_the_article_issue()**
+
+
+
+**get_the_article_issue_ID()**
+
+
 
 **the_issues_widget( args )**
 
