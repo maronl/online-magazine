@@ -220,7 +220,7 @@ class Online_Magazine_Manager_Public {
     public function get_the_articles($args = array()) {
         $args_articoli = array(
             'post_type' => 'onlimag-article',
-            'post_status' => 'published',
+            'post_status' => 'publish',
         );
 
         $magazine = null;
@@ -250,7 +250,15 @@ class Online_Magazine_Manager_Public {
             $args_articoli['post_per_page'] = $post_per_page;
         }
 
-        $this->add_filters_for_articles_query($magazine);
+        if (isset($post_status)) {
+            $args_articoli['post_status'] = $post_status;
+        }
+
+        if($magazine === -1){
+            $this->add_filters_for_articles_without_an_issue_query();
+        }else{
+            $this->add_filters_for_articles_query($magazine);
+        }
 
         $articles = new WP_Query($args_articoli);
 
@@ -286,9 +294,9 @@ class Online_Magazine_Manager_Public {
         $current_blog_id = get_current_blog_id();
         $join .=
             "
-              INNER JOIN " . $table_prefix . "onlimag_magazine
+              LEFT JOIN " . $table_prefix . "onlimag_magazine
                 ON (" . $table_prefix . "onlimag_magazine.article_id = $wpdb->posts.ID)
-              INNER JOIN " . $table_prefix . "posts as magazine_details
+              LEFT JOIN " . $table_prefix . "posts as magazine_details
                 ON (" . $table_prefix . "onlimag_magazine.magazine_id = magazine_details.ID)
             ";
         return $join;
@@ -314,16 +322,25 @@ class Online_Magazine_Manager_Public {
 
     public function posts_where_filter_for_magazine( $where ) {
         global $table_prefix;
-        $where .= " AND " . $table_prefix . "onlimag_magazine.magazine_id = " . $this->selectedMagazine;
+        $where .= " AND " . $table_prefix . "onlimag_magazine.magazine_id ";
+        if( is_null( $this->selectedMagazine ) ) {
+            $where .= " IS NULL";
+        }else{
+            $where .= " = " . $this->selectedMagazine;
+        }
         return $where;
 
     }
 
-    public function add_filters_for_articles_query( $magazine_id = null ) {
+    public function add_main_filters_for_articles_query() {
         add_filter('posts_join', array( $this, 'posts_join_filter_for_articles' ) );
         add_filter('posts_fields', array( $this, 'posts_fields_filter_for_articles' ) );
         add_filter('posts_groupby', array( $this, 'posts_groupby_filter_for_articles' ) );
         add_filter('posts_join', array( $this, 'posts_join_filter_for_magazine' ) );
+    }
+
+    public function add_filters_for_articles_query( $magazine_id = null ) {
+        $this->add_main_filters_for_articles_query();
         if ( isset( $magazine_id ) && is_int( (int) $magazine_id ) ) {
             $this->selectedMagazine = $magazine_id;
             add_filter('posts_fields', array( $this, 'posts_fields_filter_for_articles_issue_order' ) );
@@ -332,10 +349,13 @@ class Online_Magazine_Manager_Public {
     }
 
     public function add_filters_for_single_article_query() {
-        add_filter('posts_join', array( $this, 'posts_join_filter_for_articles' ) );
-        add_filter('posts_fields', array( $this, 'posts_fields_filter_for_articles' ) );
-        add_filter('posts_groupby', array( $this, 'posts_groupby_filter_for_articles' ) );
-        add_filter('posts_join', array( $this, 'posts_join_filter_for_magazine' ) );
+        $this->add_main_filters_for_articles_query();
+    }
+
+    public function add_filters_for_articles_without_an_issue_query( $magazine_id = null ) {
+        $this->add_main_filters_for_articles_query();
+        $this->selectedMagazine = null;
+        add_filter('posts_where', array( $this, 'posts_where_filter_for_magazine' ) );
     }
 
     public function remove_filters_for_articles_query( $magazine_id = null ) {
@@ -343,11 +363,11 @@ class Online_Magazine_Manager_Public {
         remove_filter('posts_fields', array( $this, 'posts_fields_filter_for_articles' ) );
         remove_filter('posts_groupby', array( $this, 'posts_groupby_filter_for_articles' ) );
         remove_filter('posts_join', array( $this, 'posts_join_filter_for_magazine' ) );
-        if ( isset( $magazine_id ) && is_int( (int) $magazine_id ) ) {
+//        if ( isset( $magazine_id ) && is_int( (int) $magazine_id ) ) {
             $this->selectedMagazine = null;
             remove_filter('posts_fields', array( $this, 'posts_fields_filter_for_articles_issue_order' ) );
             remove_filter('posts_where', array( $this, 'posts_where_filter_for_magazine' ) );
-        }
+//        }
     }
 
 }

@@ -176,11 +176,37 @@ class Online_Magazine_Manager_Admin {
 
             global $post;
 
-            echo '<li id="articles_orders_'.$post->ID.'" class="ui-state-default">'.$post->post_title.'</li>';
+            echo '<li id="articles_orders_'.$post->ID.'" class="ui-state-default">'.$post->post_title.' - <a class="remove-article-issue" href="#'.$post->ID.'">remove</a></li>';
 
         endwhile;
 
         echo '</ul>';
+
+        echo '<hr>';
+
+        $articles_no_issues = $ommp->get_the_articles( array( 'magazine' => -1, 'post_status' => array('publish', 'draft')) );
+
+        echo '<h4>Add article to the issue</h4>';
+
+        echo '<select id="article-items">';
+
+        echo '<option>Seleziona un articolo</option>';
+
+        while ( $articles_no_issues->have_posts() ) :
+
+            $articles_no_issues->the_post();
+
+            global $post;
+
+            echo '<option value="'.$post->ID.'">'.$post->post_title.'</option>';
+
+        endwhile;
+
+        echo '</select>';
+
+        echo '<a id="add-article-issue" class="button button-primary">Add Article</a>';
+
+        echo '<hr>';
 
         echo '<a id="save-issue-menu" class="button button-primary">Save Issue Menu</a>';
 
@@ -194,11 +220,45 @@ class Online_Magazine_Manager_Admin {
 
                     var data = 'action=update_issue_articles_orders&post_ID=' + jQuery('#post_ID').val() + '&' + jQuery( "#sortable" ).sortable( 'serialize' );
 
-                    // since 2.8 ajaxurl is always defined in the admin header and points to admin-ajax.php
                     jQuery.post(ajaxurl, data, function(response) {
                         console.log( 'Got this from the server: ' + response );
                     });
                 });
+
+                jQuery( "#add-article-issue").click( function() {
+
+                    var data = 'action=add_article_issue'
+                        + '&post_ID=' + jQuery('#post_ID').val()
+                        + '&article_order=' + ( jQuery( "#sortable li").length + 1 )
+                        + '&new_article_ID=' + jQuery( "#article-items option:selected" ).val()
+                        + '&new_article_title=' + jQuery( "#article-items option:selected" ).text();
+
+                    jQuery.post(ajaxurl, data, function(response) {
+
+                        if(response.status == 1){
+
+                            new_article = '<li id="articles_orders_' + response.data.id + '" class="ui-state-default">' + response.data.title + '</li>';
+
+                            jQuery("#sortable").append(new_article);
+                            jQuery("#sortable").sortable('refresh');
+                        }
+                    },'json');
+                });
+
+                jQuery( ".remove-article-issue").click( function() {
+
+                    var data = 'action=remove_article_issue'
+                        + '&post_ID=' + jQuery('#post_ID').val()
+                        + '&article_ID=' + jQuery( this ).attr('href').slice(1)
+
+                    jQuery.post(ajaxurl, data, function(response) {
+
+                        if(response.status == 1){
+                            jQuery( '#articles_orders_' + response.data.article_ID).slideUp( 'normal', function() { $(this).remove(); } );
+                        }
+                    },'json');
+                });
+
             });
 
 
@@ -231,6 +291,66 @@ class Online_Magazine_Manager_Admin {
         }
 
         echo 1;
+
+        die();
+
+    }
+
+    function add_ajax_article_issue() {
+        global $table_prefix, $wpdb; // this is how you get access to the database
+
+        $wpdb->replace(
+            $table_prefix . 'onlimag_magazine',
+            array(
+                'magazine_id' => $_POST['post_ID'],
+                'article_id' => $_POST['new_article_ID'],
+                'order' => $_POST['article_order'],
+            ),
+            array(
+                '%d',
+                '%d',
+                '%d',
+            )
+        );
+
+        $res = array(
+            'status' => 1,
+            'data' => array(
+                'id' => $_POST['new_article_ID'],
+                'title' => $_POST['new_article_title'],
+            ),
+        );
+
+        echo json_encode( $res );
+
+        die();
+
+    }
+
+    function remove_ajax_article_issue() {
+        global $table_prefix, $wpdb; // this is how you get access to the database
+
+        $wpdb->delete(
+            $table_prefix . 'onlimag_magazine',
+            array(
+                'magazine_id' => $_POST['post_ID'],
+                'article_id' => $_POST['article_ID'],
+            ),
+            array(
+                '%d',
+                '%d',
+            )
+        );
+
+        $res = array(
+            'status' => 1,
+            'data' => array(
+                'post_ID' => $_POST['post_ID'],
+                'article_ID' => $_POST['article_ID'],
+            ),
+        );
+
+        echo json_encode( $res );
 
         die();
 
