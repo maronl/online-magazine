@@ -166,6 +166,8 @@ class Online_Magazine_Manager_Admin {
 
         $articles = $ommp->get_the_articles( array( 'magazine' => $post->ID) );
 
+        usort( $articles->posts, array($ommp, 'issue_articles_order_compare') );
+
         echo '<ul id="sortable">';
 
         while ( $articles->have_posts() ) :
@@ -174,21 +176,63 @@ class Online_Magazine_Manager_Admin {
 
             global $post;
 
-            echo '<li class="ui-state-default">'.$post->post_title.'</li>';
+            echo '<li id="articles_orders_'.$post->ID.'" class="ui-state-default">'.$post->post_title.'</li>';
 
         endwhile;
 
         echo '</ul>';
+
+        echo '<a id="save-issue-menu" class="button button-primary">Save Issue Menu</a>';
 
         ?>
         <script>
             jQuery(function() {
                 jQuery( "#sortable" ).sortable();
                 jQuery( "#sortable" ).disableSelection();
+
+                jQuery( "#save-issue-menu").click( function() {
+
+                    var data = 'action=update_issue_articles_orders&post_ID=' + jQuery('#post_ID').val() + '&' + jQuery( "#sortable" ).sortable( 'serialize' );
+
+                    // since 2.8 ajaxurl is always defined in the admin header and points to admin-ajax.php
+                    jQuery.post(ajaxurl, data, function(response) {
+                        console.log( 'Got this from the server: ' + response );
+                    });
+                });
             });
+
+
+
         </script>
 <?php
 
     }
 
+    function update_ajax_issue_articles_orders() {
+        global $table_prefix, $wpdb; // this is how you get access to the database
+
+        $order = 0;
+
+        foreach( $_POST['articles_orders'] as $article_ID ) {
+            $order++;
+            $wpdb->replace(
+                $table_prefix . 'onlimag_magazine',
+                array(
+                    'magazine_id' => $_POST['post_ID'],
+                    'article_id' => $article_ID,
+                    'order' => $order,
+                ),
+                array(
+                    '%d',
+                    '%d',
+                    '%d',
+                )
+            );
+        }
+
+        echo 1;
+
+        die();
+
+    }
 }

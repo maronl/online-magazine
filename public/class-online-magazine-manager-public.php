@@ -259,6 +259,14 @@ class Online_Magazine_Manager_Public {
         return $articles;
     }
 
+    /*
+     * function useful to compare order of articles when they are assigned to an issue
+     * this function is valid only when you compare article inside an issue
+     */
+    function issue_articles_order_compare($a, $b){
+        return $a->article_order - $b->article_order;
+    }
+
     public function posts_join_filter_for_articles( $join ) {
         global $wpdb;
         $join .=
@@ -287,8 +295,14 @@ class Online_Magazine_Manager_Public {
     }
 
     public function posts_fields_filter_for_articles( $fields ) {
-        global $wpdb;
+        global $table_prefix, $wpdb;
         $fields .= ", magazine_details.ID as issue_ID, magazine_details.post_title as issue_title, magazine_details.post_name as issue_slug, GROUP_CONCAT($wpdb->terms.name SEPARATOR ', ') as rubrics";
+        return ($fields);
+    }
+
+    public function posts_fields_filter_for_articles_issue_order( $fields ) {
+        global $table_prefix, $wpdb;
+        $fields .= ", " . $table_prefix . "onlimag_magazine.order as article_order ";
         return ($fields);
     }
 
@@ -312,6 +326,7 @@ class Online_Magazine_Manager_Public {
         add_filter('posts_join', array( $this, 'posts_join_filter_for_magazine' ) );
         if ( isset( $magazine_id ) && is_int( (int) $magazine_id ) ) {
             $this->selectedMagazine = $magazine_id;
+            add_filter('posts_fields', array( $this, 'posts_fields_filter_for_articles_issue_order' ) );
             add_filter('posts_where', array( $this, 'posts_where_filter_for_magazine' ) );
         }
     }
@@ -330,6 +345,7 @@ class Online_Magazine_Manager_Public {
         remove_filter('posts_join', array( $this, 'posts_join_filter_for_magazine' ) );
         if ( isset( $magazine_id ) && is_int( (int) $magazine_id ) ) {
             $this->selectedMagazine = null;
+            remove_filter('posts_fields', array( $this, 'posts_fields_filter_for_articles_issue_order' ) );
             remove_filter('posts_where', array( $this, 'posts_where_filter_for_magazine' ) );
         }
     }

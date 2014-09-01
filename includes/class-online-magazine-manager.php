@@ -115,6 +115,7 @@ class Online_Magazine_Manager {
         $this->loader->add_action( 'init', $admin, 'init_rewrite_rules' );
         $this->loader->add_action( 'parent_file', $admin, 'taxonomy_submenu_correction' );
         $this->loader->add_action( 'add_meta_boxes', $admin, 'add_meta_box_issue_articles' );
+        $this->loader->add_action( 'wp_ajax_update_issue_articles_orders', $admin, 'update_ajax_issue_articles_orders' );
 
         /*
         $admin = new Secure_Attachments_Manager_Admin( $this->version );
