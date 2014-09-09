@@ -114,30 +114,6 @@ class Online_Magazine_Manager {
         $this->loader->add_action( 'init', $admin, 'register_issue_article_post_type' );
         $this->loader->add_action( 'init', $admin, 'init_rewrite_rules' );
         $this->loader->add_action( 'parent_file', $admin, 'taxonomy_submenu_correction' );
-        $this->loader->add_action( 'add_meta_boxes', $admin, 'add_meta_box_issue_articles' );
-        $this->loader->add_action( 'wp_ajax_update_issue_articles_orders', $admin, 'update_ajax_issue_articles_orders' );
-        $this->loader->add_action( 'wp_ajax_add_article_issue', $admin, 'add_ajax_article_issue' );
-        $this->loader->add_action( 'wp_ajax_remove_article_issue', $admin, 'remove_ajax_article_issue' );
-
-        /*
-        $admin = new Secure_Attachments_Manager_Admin( $this->version );
-        $this->loader->add_action( 'admin_init', $admin, 'register_scripts' );
-        $this->loader->add_action( 'admin_init', $admin, 'register_styles' );
-        $this->loader->add_action( 'admin_enqueue_scripts', $admin, 'enqueue_scripts' );
-        $this->loader->add_action( 'admin_enqueue_scripts', $admin, 'enqueue_styles' );
-        $this->loader->add_action( 'admin_menu', $admin, 'add_plugin_options_page' );
-        $this->loader->add_action( 'admin_init', $admin, 'options_page_init' );
-        $this->loader->add_action( 'wp_ajax_saud', $admin, 'secure_attachments_ajax_upload_document' );
-        $this->loader->add_action( 'wp_ajax_sard', $admin, 'secure_attachments_ajax_remove_document' );
-        $this->loader->add_action( 'wp_ajax_samd', $admin, 'secure_attachments_ajax_modify_document' );
-        $this->loader->add_action( 'wp_ajax_sald', $admin, 'secure_attachments_ajax_loading_document' );
-
-        global $pagenow;
-        if( 'post.php' == $pagenow) {
-            $this->loader->add_action( 'add_meta_boxes_post', $admin, 'add_meta_box_post' );
-            $this->loader->add_action( 'add_meta_boxes_page', $admin, 'add_meta_box_page' );
-        }
-        */
 
     }
 

@@ -33,7 +33,7 @@ class Online_Magazine_Manager_Public {
             $this->add_filters_for_articles_query();
         }
         if  ( is_single() && $query->is_main_query() && $query->query_vars['post_type'] == 'onlimag-article' ) {
-            $this->add_filters_for_single_article_query();
+            $this->add_filters_for_articles_query();
         }
         return $query;
     }
@@ -111,43 +111,6 @@ class Online_Magazine_Manager_Public {
 
     }
 
-    public function get_the_article_issue( $article_id = null ) {
-
-        $issue_id = $this->get_the_article_issue_ID($article_id);
-
-        $args['post_status'] = 'publish';
-        $args['post_type'] = 'onlimag-issue';
-        $args['p'] = $issue_id;
-
-        $issue = new WP_Query($args);
-
-        return $issue->post;
-
-    }
-
-    public function get_the_article_issue_ID( $article_id = null ) {
-
-        if( is_null( $article_id ) ) {
-            return null;
-        }
-
-        global $table_prefix, $wpdb;
-
-        $issue_id = $wpdb->get_results(
-            $wpdb->prepare(
-                "
-                SELECT magazine_id
-                FROM " . $table_prefix . "onlimag_magazine
-                WHERE article_id = %d
-                ",
-                $article_id
-            )
-        );
-
-        return $issue_id[0]->magazine_id;
-
-    }
-
     public function get_the_published_issues( $args = array() ) {
 
         if ( ! isset( $args['orderby'] ) ) {
@@ -217,56 +180,6 @@ class Online_Magazine_Manager_Public {
         }
     }
 
-    public function get_the_articles($args = array()) {
-        $args_articoli = array(
-            'post_type' => 'onlimag-article',
-            'post_status' => 'publish',
-        );
-
-        $magazine = null;
-
-        /*
-         * extract setting passed by callers: magazine, rubrics, paged
-         * they overwrite default values
-        */
-        extract($args);
-
-        if (isset($rubrics) && ! empty( $rubrics ) ) {
-            $args_tax_query = array(
-                array(
-                    'taxonomy' => 'onlimag-rubric',
-                    'field' => 'slug',
-                    'terms' => $rubrics,
-                )
-            );
-            $args_articoli['tax_query'] = $args_tax_query;
-        }
-
-        if (isset($paged)) {
-            $args_articoli['paged'] = $paged;
-        }
-
-        if (isset($post_per_page)) {
-            $args_articoli['post_per_page'] = $post_per_page;
-        }
-
-        if (isset($post_status)) {
-            $args_articoli['post_status'] = $post_status;
-        }
-
-        if($magazine === -1){
-            $this->add_filters_for_articles_without_an_issue_query();
-        }else{
-            $this->add_filters_for_articles_query($magazine);
-        }
-
-        $articles = new WP_Query($args_articoli);
-
-        $this->remove_filters_for_articles_query($magazine);
-
-        return $articles;
-    }
-
     /*
      * function useful to compare order of articles when they are assigned to an issue
      * this function is valid only when you compare article inside an issue
@@ -294,23 +207,17 @@ class Online_Magazine_Manager_Public {
         $current_blog_id = get_current_blog_id();
         $join .=
             "
-              LEFT JOIN " . $table_prefix . "onlimag_magazine
-                ON (" . $table_prefix . "onlimag_magazine.article_id = $wpdb->posts.ID)
-              LEFT JOIN " . $table_prefix . "posts as magazine_details
-                ON (" . $table_prefix . "onlimag_magazine.magazine_id = magazine_details.ID)
+              LEFT JOIN " . $table_prefix . "related_posts
+                ON (" . $table_prefix . "related_posts.related_post_id = $wpdb->posts.ID)
+              LEFT JOIN " . $table_prefix . "posts as related_post_details
+                ON (" . $table_prefix . "related_posts.linking_post_id = related_post_details.ID)
             ";
         return $join;
     }
 
     public function posts_fields_filter_for_articles( $fields ) {
         global $table_prefix, $wpdb;
-        $fields .= ", magazine_details.ID as issue_ID, magazine_details.post_title as issue_title, magazine_details.post_name as issue_slug, GROUP_CONCAT($wpdb->terms.name SEPARATOR ', ') as rubrics";
-        return ($fields);
-    }
-
-    public function posts_fields_filter_for_articles_issue_order( $fields ) {
-        global $table_prefix, $wpdb;
-        $fields .= ", " . $table_prefix . "onlimag_magazine.order as article_order ";
+        $fields .= ", related_post_details.ID as issue_ID, related_post_details.post_title as issue_title, related_post_details.post_name as issue_slug, GROUP_CONCAT($wpdb->terms.name SEPARATOR ', ') as rubrics";
         return ($fields);
     }
 
@@ -318,18 +225,6 @@ class Online_Magazine_Manager_Public {
         global $wpdb;
         $groupby = "{$wpdb->posts}.ID";
         return $groupby;
-    }
-
-    public function posts_where_filter_for_magazine( $where ) {
-        global $table_prefix;
-        $where .= " AND " . $table_prefix . "onlimag_magazine.magazine_id ";
-        if( is_null( $this->selectedMagazine ) ) {
-            $where .= " IS NULL";
-        }else{
-            $where .= " = " . $this->selectedMagazine;
-        }
-        return $where;
-
     }
 
     public function add_main_filters_for_articles_query() {
@@ -341,21 +236,6 @@ class Online_Magazine_Manager_Public {
 
     public function add_filters_for_articles_query( $magazine_id = null ) {
         $this->add_main_filters_for_articles_query();
-        if ( isset( $magazine_id ) && is_int( (int) $magazine_id ) ) {
-            $this->selectedMagazine = $magazine_id;
-            add_filter('posts_fields', array( $this, 'posts_fields_filter_for_articles_issue_order' ) );
-            add_filter('posts_where', array( $this, 'posts_where_filter_for_magazine' ) );
-        }
-    }
-
-    public function add_filters_for_single_article_query() {
-        $this->add_main_filters_for_articles_query();
-    }
-
-    public function add_filters_for_articles_without_an_issue_query( $magazine_id = null ) {
-        $this->add_main_filters_for_articles_query();
-        $this->selectedMagazine = null;
-        add_filter('posts_where', array( $this, 'posts_where_filter_for_magazine' ) );
     }
 
     public function remove_filters_for_articles_query( $magazine_id = null ) {
@@ -363,11 +243,32 @@ class Online_Magazine_Manager_Public {
         remove_filter('posts_fields', array( $this, 'posts_fields_filter_for_articles' ) );
         remove_filter('posts_groupby', array( $this, 'posts_groupby_filter_for_articles' ) );
         remove_filter('posts_join', array( $this, 'posts_join_filter_for_magazine' ) );
-//        if ( isset( $magazine_id ) && is_int( (int) $magazine_id ) ) {
-            $this->selectedMagazine = null;
-            remove_filter('posts_fields', array( $this, 'posts_fields_filter_for_articles_issue_order' ) );
-            remove_filter('posts_where', array( $this, 'posts_where_filter_for_magazine' ) );
-//        }
+    }
+
+    public function posts_join_filter_for_rubrics_related_post( $join ) {
+        global $table_prefix, $wpdb;
+        $join .=
+            "
+              INNER JOIN $wpdb->term_relationships as term_relationships_others
+                ON (" . $table_prefix . "related_posts.related_post_id = term_relationships_others.object_id)
+              INNER JOIN $wpdb->term_taxonomy
+                ON (term_relationships_others.term_taxonomy_id = $wpdb->term_taxonomy.term_taxonomy_id)
+              INNER JOIN $wpdb->terms
+                ON ($wpdb->term_taxonomy.term_id = $wpdb->terms.term_id)
+            ";
+        return $join;
+    }
+
+    public function posts_fields_filter_for_rubrics_related_posts( $fields ) {
+        global $table_prefix, $wpdb;
+        $fields .= ", GROUP_CONCAT($wpdb->terms.name SEPARATOR ', ') as rubrics";
+        return ($fields);
+    }
+
+    public function posts_groupby_filter_for_rubrics_related_posts( $groupby ) {
+        global $table_prefix, $wpdb;
+        $groupby =  $table_prefix . "related_posts.ID";
+        return $groupby;
     }
 
 }
