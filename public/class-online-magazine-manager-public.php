@@ -74,7 +74,7 @@ class Online_Magazine_Manager_Public {
         $title = __('Rubrics', 'onlimag');
         $read_all_text = __('Read all', 'onlimag');
         $title_format = '<h4>%s</h4>';
-        $container_format = '<ol class="list-unstyled">%s</ol>';
+        $container_format = '<ul class="list-unstyled">%s</ul>';
         $item_format = '<li><a href="/rubrics/%s">%s</a></li>';
         $read_all_format = '<a href="/rubrics">%s</a>';
         $item_number = 5;
@@ -156,7 +156,7 @@ class Online_Magazine_Manager_Public {
         $title = __('Issues', 'onlimag');
         $read_all_text = __('Read all', 'onlimag');
         $title_format = '<h4>%s</h4>';
-        $container_format = '<ol class="list-unstyled">%s</ol>';
+        $container_format = '<ul class="list-unstyled">%s</ul>';
         $item_format = '<li><a href="/issues/%s">%s</a></li>';
         $read_all_format = '<a href="/issues">%s</a>';
         $item_number = 5;

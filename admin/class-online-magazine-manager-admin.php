@@ -144,6 +144,14 @@ class Online_Magazine_Manager_Admin {
             $parent_file = 'online-magazine';
             global $submenu_file;
             $submenu_file = 'edit-tags.php?taxonomy=onlimag-rubric&post_type=onlimag-article';
+        }elseif($current_screen->id == 'onlimag-article'){
+            $parent_file = 'online-magazine';
+            global $submenu_file;
+            $submenu_file = 'edit.php?post_type=onlimag-article';
+        }elseif($current_screen->id == 'onlimag-issue'){
+            $parent_file = 'online-magazine';
+            global $submenu_file;
+            $submenu_file = 'edit.php?post_type=onlimag-issue';
         }
         return $parent_file;
 
