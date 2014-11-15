@@ -196,11 +196,11 @@ class Online_Magazine_Manager_Public {
         global $wpdb;
         $join .=
             "
-              INNER JOIN $wpdb->term_relationships as term_relationships_others
+              LEFT JOIN $wpdb->term_relationships as term_relationships_others
                 ON ($wpdb->posts.ID = term_relationships_others.object_id)
-              INNER JOIN $wpdb->term_taxonomy
+              LEFT JOIN $wpdb->term_taxonomy
                 ON (term_relationships_others.term_taxonomy_id = $wpdb->term_taxonomy.term_taxonomy_id)
-              INNER JOIN $wpdb->terms
+              LEFT JOIN $wpdb->terms
                 ON ($wpdb->term_taxonomy.term_id = $wpdb->terms.term_id)
             ";
         return $join;
@@ -217,6 +217,14 @@ class Online_Magazine_Manager_Public {
                 ON (" . $table_prefix . "related_posts.linking_post_id = related_post_details.ID)
             ";
         return $join;
+    }
+
+    public function posts_where_filter_for_published_magazine( $where ) {
+        $where .=
+            "
+              AND related_post_details.post_status = 'publish'
+            ";
+        return $where;
     }
 
     public function posts_fields_filter_for_articles( $fields ) {
@@ -236,6 +244,7 @@ class Online_Magazine_Manager_Public {
         add_filter('posts_fields', array( $this, 'posts_fields_filter_for_articles' ) );
         add_filter('posts_groupby', array( $this, 'posts_groupby_filter_for_articles' ) );
         add_filter('posts_join', array( $this, 'posts_join_filter_for_magazine' ) );
+        add_filter('posts_where', array( $this, 'posts_where_filter_for_published_magazine' ) );
     }
 
     public function add_filters_for_articles_query( $magazine_id = null ) {
@@ -247,17 +256,18 @@ class Online_Magazine_Manager_Public {
         remove_filter('posts_fields', array( $this, 'posts_fields_filter_for_articles' ) );
         remove_filter('posts_groupby', array( $this, 'posts_groupby_filter_for_articles' ) );
         remove_filter('posts_join', array( $this, 'posts_join_filter_for_magazine' ) );
+        remove_filter('posts_where', array( $this, 'posts_where_filter_for_published_magazine' ) );
     }
 
     public function posts_join_filter_for_rubrics_related_post( $join ) {
         global $table_prefix, $wpdb;
         $join .=
             "
-              INNER JOIN $wpdb->term_relationships as term_relationships_others
+              LEFT JOIN $wpdb->term_relationships as term_relationships_others
                 ON (" . $table_prefix . "related_posts.related_post_id = term_relationships_others.object_id)
-              INNER JOIN $wpdb->term_taxonomy
+              LEFT JOIN $wpdb->term_taxonomy
                 ON (term_relationships_others.term_taxonomy_id = $wpdb->term_taxonomy.term_taxonomy_id)
-              INNER JOIN $wpdb->terms
+              LEFT JOIN $wpdb->terms
                 ON ($wpdb->term_taxonomy.term_id = $wpdb->terms.term_id)
             ";
         return $join;
