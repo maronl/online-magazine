@@ -96,7 +96,8 @@ class Online_Magazine_Manager_Public {
                 $items_output .= sprintf($item_format, $rubric->slug, $rubric->name, PHP_EOL);
             }
             printf($container_format, $items_output, PHP_EOL);
-            printf($read_all_format, $read_all_text, PHP_EOL);
+            if( !empty($read_all_text) )
+                printf($read_all_format, $read_all_text, PHP_EOL);
         }
     }
 
@@ -178,7 +179,8 @@ class Online_Magazine_Manager_Public {
                 $items_output .= sprintf($item_format, $issue->post_name, $issue->post_title, PHP_EOL);
             }
             printf($container_format, $items_output, PHP_EOL);
-            printf($read_all_format, $read_all_text, PHP_EOL);
+            if( !empty($read_all_text) )
+                printf($read_all_format, $read_all_text, PHP_EOL);
         }
     }
 
