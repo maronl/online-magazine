@@ -10,10 +10,10 @@ class Online_Magazine_Manager_Admin {
     }
 
     function register_admin_menu(){
-        add_menu_page( __( 'Online Magazine', 'online-magazine' ), __( 'Magazine', 'online-magazine' ), 'edit_others_posts', 'online-magazine', array( $this, 'render_magazine_overview_page'), '', 21 );
-        add_submenu_page( 'online-magazine', __( 'Issues', 'online-magazine' ), __( 'Issues', 'online-magazine' ), 'edit_posts', 'edit.php?post_type=onlimag-issue', '' );
-        add_submenu_page( 'online-magazine', __( 'Articles', 'online-magazine' ), __( 'Articles', 'online-magazine' ), 'edit_others_posts', 'edit.php?post_type=onlimag-article', '' );
-        add_submenu_page( 'online-magazine', __( 'Rubrics', 'online-magazine' ), __( 'Rubrics', 'online-magazine' ), 'edit_posts', 'edit-tags.php?taxonomy=onlimag-rubric&post_type=onlimag-article', '' );
+        add_menu_page( __( 'Online Magazine', 'online-magazine' ), __( 'Magazine', 'online-magazine' ), 'edit_posts', 'online-magazine', array( $this, 'render_magazine_overview_page'), '', 21 );
+        add_submenu_page( 'online-magazine', __( 'Issues', 'online-magazine' ), __( 'Issues', 'online-magazine' ), 'edit_others_posts', 'edit.php?post_type=onlimag-issue', '' );
+        add_submenu_page( 'online-magazine', __( 'Articles', 'online-magazine' ), __( 'Articles', 'online-magazine' ), 'edit_posts', 'edit.php?post_type=onlimag-article', '' );
+        add_submenu_page( 'online-magazine', __( 'Rubrics', 'online-magazine' ), __( 'Rubrics', 'online-magazine' ), 'edit_others_posts', 'edit-tags.php?taxonomy=onlimag-rubric&post_type=onlimag-article', '' );
     }
 
     function init_rewrite_rules() {
