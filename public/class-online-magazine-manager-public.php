@@ -89,7 +89,8 @@ class Online_Magazine_Manager_Public {
 
         $rubrics = $this->get_the_rubrics(array('number' => $item_number));
         if (!empty($rubrics)) {
-            printf($title_format, $title, PHP_EOL);
+            if( !empty($title) )
+                printf($title_format, $title, PHP_EOL);
             $items_output = '';
             foreach ($rubrics as $rubric) {
                 $items_output .= sprintf($item_format, $rubric->slug, $rubric->name, PHP_EOL);
@@ -170,7 +171,8 @@ class Online_Magazine_Manager_Public {
         $issues = $this->get_the_published_issues(array('posts_per_page' => $item_number));
         $issues = $issues->posts;
         if (!empty($issues)) {
-            printf($title_format, $title, PHP_EOL);
+            if( !empty($title) )
+                printf($title_format, $title, PHP_EOL);
             $items_output = '';
             foreach ($issues as $issue) {
                 $items_output .= sprintf($item_format, $issue->post_name, $issue->post_title, PHP_EOL);
