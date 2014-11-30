@@ -135,7 +135,6 @@ class Online_Magazine_Manager {
         $this->loader->add_action( 'query_vars', $public, 'register_query_vars' );
         $this->loader->add_action( 'pre_get_posts', $public, 'fix_archive_query_with_rubrics_filter' );
 
-
     }
 
     /**

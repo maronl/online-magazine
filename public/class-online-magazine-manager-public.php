@@ -16,11 +16,12 @@ class Online_Magazine_Manager_Public {
     public function register_query_vars( $qvars ) {
         $qvars[] = 'rubrics';
         $qvars[] = 'magazine';
+        $qvars[] = 'editoriale';
         return $qvars;
     }
 
     public function fix_archive_query_with_rubrics_filter( $query ) {
-        if( ! $query->is_main_query() ) {
+        if( ! $query->is_main_query() || is_admin()) {
             $this->remove_filters_for_articles_query();
             return $query;
         }
@@ -28,12 +29,13 @@ class Online_Magazine_Manager_Public {
         if (
         ( is_tax() && $query->is_main_query() && isset( $query->query_vars['onlimag-rubric'] ) )
         ||
-        ( is_archive() && $query->is_main_query() && $query->query_vars['post_type'] == 'onlimag-article' )
+        ( is_archive() && $query->is_main_query() && isset( $query->query_vars['post_type'] ) && $query->query_vars['post_type'] == 'onlimag-article' )
         ) {
             $this->add_filters_for_articles_query();
-        }
-        if  ( is_single() && $query->is_main_query() && $query->query_vars['post_type'] == 'onlimag-article' ) {
+        }elseif  ( is_single() && $query->is_main_query() && isset( $query->query_vars['post_type'] ) && $query->query_vars['post_type'] == 'onlimag-article' ) {
             $this->add_filters_for_articles_query();
+        }else{
+            $this->remove_filters_for_articles_query();
         }
         return $query;
     }
