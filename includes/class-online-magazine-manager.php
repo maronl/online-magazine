@@ -87,6 +87,7 @@ class Online_Magazine_Manager {
     private function load_dependencies() {
         require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/class-online-magazine-manager-admin.php';
         require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/class-online-magazine-manager-public.php';
+        require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-online-magazine-theme-functions.php';
 
         require_once plugin_dir_path( __FILE__ ) . 'class-online-magazine-loader.php';
         $this->loader = new Online_Magazine_Loader();
@@ -134,6 +135,8 @@ class Online_Magazine_Manager {
         $public = new Online_Magazine_Manager_Public( $this->version );
         $this->loader->add_action( 'query_vars', $public, 'register_query_vars' );
         $this->loader->add_action( 'pre_get_posts', $public, 'fix_archive_query_with_rubrics_filter' );
+        Online_Magazine_Theme_Functions::define_theme_functions();
+        add_image_size( 'thumb-article-homepage', 370, 180, true);
 
     }
 

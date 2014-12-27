@@ -153,6 +153,38 @@ class Online_Magazine_Manager_Public {
 
     }
 
+    public function get_the_most_read_articles() {
+
+        $args = array();
+        $args['orderby'] = 'date';
+        $args['order'] = 'ASC';
+        $args['posts_per_page'] = 3;
+        $args['post_status'] = 'publish';
+        $args['post_type'] = 'onlimag-article';
+
+        $articles = new WP_Query($args);
+
+        return $articles;
+        //return $articles->posts;
+
+    }
+
+    public function get_the_most_voted_articles() {
+
+        $args = array();
+        $args['orderby'] = 'date';
+        $args['order'] = 'DESC';
+        $args['posts_per_page'] = 3;
+        $args['post_status'] = 'publish';
+        $args['post_type'] = 'onlimag-article';
+
+        $articles = new WP_Query($args);
+
+        return $articles;
+        //return $articles->posts;
+
+    }
+
     public function the_issues_widget($args = array()) {
 
         $title = __('Issues', 'onlimag');
