@@ -281,11 +281,11 @@ class Online_Magazine_Manager_Public {
         add_filter('posts_where', array( $this, 'posts_where_filter_for_published_magazine' ) );
     }
 
-    public function add_filters_for_articles_query( $magazine_id = null ) {
+    public function add_filters_for_articles_query() {
         $this->add_main_filters_for_articles_query();
     }
 
-    public function remove_filters_for_articles_query( $magazine_id = null ) {
+    public function remove_filters_for_articles_query() {
         remove_filter('posts_join', array( $this, 'posts_join_filter_for_articles' ) );
         remove_filter('posts_fields', array( $this, 'posts_fields_filter_for_articles' ) );
         remove_filter('posts_groupby', array( $this, 'posts_groupby_filter_for_articles' ) );
